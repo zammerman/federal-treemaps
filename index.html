@@ -84,20 +84,27 @@
         
         .legend {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 6px 10px;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
             width: 100%;
             padding: 0 10px;
+        }
+        
+        .legend-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 4px 8px;
         }
         
         .legend-item {
             display: flex;
             align-items: center;
             font-family: 'Faustina', serif;
-            font-size: 10px;
+            font-size: 9px;
             cursor: pointer;
-            padding: 2px 4px;
+            padding: 2px 3px;
             border-radius: 3px;
             transition: background-color 0.2s;
             white-space: nowrap;
@@ -224,31 +231,56 @@
         
         const departments = data.children.map(d => d.name);
         
-        // Create legend with abbreviated names for long departments
+        // Create legend with two rows for better width management
         const legend = d3.select("#legend");
-        const legendNames = {
-            "Agriculture": "Agriculture",
-            "Commerce": "Commerce",
-            "Education": "Education",
-            "Energy": "Energy",
-            "Health and Human Services": "HHS",
-            "Justice": "Justice",
-            "Labor": "Labor",
-            "National Science Foundation": "NSF",
-            "Social Security Administration": "SSA",
-            "Transportation": "Transportation",
-            "Treasury": "Treasury"
-        };
         
-        departments.forEach(dept => {
-            const item = legend.append("div")
+        // Define which departments go in each row
+        // You can manually adjust this split to balance the rows
+        const firstRowDepts = [
+            "Agriculture",
+            "Commerce", 
+            "Education",
+            "Energy",
+            "Health and Human Services"
+        ];
+        
+        const secondRowDepts = [
+            "Justice",
+            "Labor",
+            "National Science Foundation",
+            "Social Security Administration",
+            "Transportation",
+            "Treasury"
+        ];
+        
+        // Create first row
+        const firstRow = legend.append("div")
+            .attr("class", "legend-row");
+        
+        firstRowDepts.forEach(dept => {
+            const item = firstRow.append("div")
                 .attr("class", "legend-item")
                 .attr("data-department", dept);
             item.append("div")
                 .attr("class", "legend-color")
                 .style("background-color", departmentColors[dept]);
             item.append("span")
-                .text(legendNames[dept] || dept);
+                .text(dept);
+        });
+        
+        // Create second row
+        const secondRow = legend.append("div")
+            .attr("class", "legend-row");
+        
+        secondRowDepts.forEach(dept => {
+            const item = secondRow.append("div")
+                .attr("class", "legend-item")
+                .attr("data-department", dept);
+            item.append("div")
+                .attr("class", "legend-color")
+                .style("background-color", departmentColors[dept]);
+            item.append("span")
+                .text(dept);
         });
         
         const pack = d3.pack()
@@ -349,7 +381,7 @@
         });
         
         // Add interactive filtering on legend hover
-        d3.selectAll(".legend-item")
+        d3.selectAll(".legend-item")  // This will select items from both rows
             .on("mouseenter", function(event) {
                 const hoveredDept = d3.select(this).attr("data-department");
                 
