@@ -201,11 +201,11 @@
         // CHANGE COLORS HERE - Each department needs a unique color
         // ============================================
         const departmentColors = {
-            "Agriculture": "#FCBB13",           // Yellow
+            "Agriculture": "#1B83C6",           // Blue
             "Commerce": "#05335D",              // Dark Blue
             "Education": "#B71D51",             // Red
             "Energy": "#F26961",                // Light Red
-            "Health and Human Services": "#1B83C6",  // Blue
+            "Health and Human Services": "#FCBB13",  // Yellow
             "Justice": "#7A4FA3",               // Purple
             "Labor": "#4CAF50",                 // Green
             "National Science Foundation": "#9C27B0",  // Violet
@@ -279,44 +279,54 @@
             });
         
         // Add labels for bubbles
-        const labels = nodes.each(function(d) {
+        nodes.each(function(d) {
             const node = d3.select(this);
             const text = node.append("text")
                 .attr("class", "bubble-label")
                 .attr("dy", ".3em");
             
-            // For very large bubbles (Census), use abbreviated name
+            // For very large bubbles (like Census), show full name or acronym
             if (d.r > 70) {
-                text.style("font-size", "13px")
-                    .text("Census");
+                // Special case for very long names
+                if (d.data.name.includes("Census")) {
+                    text.style("font-size", "13px").text("Census");
+                } else {
+                    // Extract acronym if available
+                    const match = d.data.name.match(/\(([^)]+)\)/);
+                    if (match) {
+                        text.style("font-size", "13px").text(match[1]);
+                    } else {
+                        text.style("font-size", "13px").text(d.data.name.split(' ')[0]);
+                    }
+                }
             }
-            // For large bubbles
+            // For large bubbles, show acronym or abbreviated name
             else if (d.r > 45) {
-                text.style("font-size", "11px")
-                    .text(d => {
-                        // Extract acronym from name if it exists
-                        const match = d.data.name.match(/\(([^)]+)\)/);
-                        if (match) {
-                            return match[1];
-                        }
-                        return d.data.name.split(' ')[0];
-                    });
+                const match = d.data.name.match(/\(([^)]+)\)/);
+                if (match) {
+                    text.style("font-size", "11px").text(match[1]);
+                } else {
+                    text.style("font-size", "11px").text(d.data.name.split(' ')[0]);
+                }
             }
-            // For medium bubbles
+            // For medium bubbles, show acronym or short name
             else if (d.r > 25) {
-                text.style("font-size", "9px")
-                    .text(d => {
-                        const match = d.data.name.match(/\(([^)]+)\)/);
-                        if (match) {
-                            return match[1];
-                        }
-                        return d.data.name.split(' ')[0].substring(0, 4);
-                    });
+                const match = d.data.name.match(/\(([^)]+)\)/);
+                if (match) {
+                    text.style("font-size", "9px").text(match[1]);
+                } else {
+                    const firstWord = d.data.name.split(' ')[0];
+                    const shortened = firstWord.length > 6 ? firstWord.substring(0, 4) + "." : firstWord;
+                    text.style("font-size", "9px").text(shortened);
+                }
             }
-            // For smaller bubbles
+            // For smaller bubbles, show acronym if short enough
             else if (d.r > 15) {
-                text.style("font-size", "7px")
-                    .text(d => "$" + d.data.value.toFixed(0) + "M");
+                const match = d.data.name.match(/\(([^)]+)\)/);
+                if (match && match[1].length <= 6) {
+                    text.style("font-size", "7px").text(match[1]);
+                }
+                // Otherwise don't show text for tiny bubbles
             }
         });
         
