@@ -22,8 +22,8 @@
             flex-direction: column;
             align-items: center;
             background: transparent;
-            width: 700px;
-            max-width: 700px;
+            width: 685px;
+            max-width: 685px;
         }
         
         #chart {
@@ -72,7 +72,7 @@
             margin-top: 10px;
             font-family: 'Faustina', serif;
             width: 100%;
-            max-width: 640px;
+            max-width: 580px;
         }
         
         .legend-title {
@@ -226,28 +226,31 @@
         };
         // ============================================
         
-        const width = 640;  // Reduced to ensure bubbles stay within 705px
-        const height = 460; // Slightly reduced height
+        const width = 580;  // Reduced significantly to fit within 690px limit
+        const height = 440; // Proportionally reduced height
         
         const departments = data.children.map(d => d.name);
         
-        // Create legend with two rows for better width management
+        // Create legend with three rows for better width management
         const legend = d3.select("#legend");
         
         // Define which departments go in each row
-        // You can manually adjust this split to balance the rows
+        // Split into three rows for better width distribution
         const firstRowDepts = [
             "Agriculture",
             "Commerce", 
             "Education",
-            "Energy",
-            "Health and Human Services"
+            "Energy"
         ];
         
         const secondRowDepts = [
+            "Health and Human Services",
             "Justice",
             "Labor",
-            "National Science Foundation",
+            "National Science Foundation"
+        ];
+        
+        const thirdRowDepts = [
             "Social Security Administration",
             "Transportation",
             "Treasury"
@@ -283,9 +286,24 @@
                 .text(dept);
         });
         
+        // Create third row
+        const thirdRow = legend.append("div")
+            .attr("class", "legend-row");
+        
+        thirdRowDepts.forEach(dept => {
+            const item = thirdRow.append("div")
+                .attr("class", "legend-item")
+                .attr("data-department", dept);
+            item.append("div")
+                .attr("class", "legend-color")
+                .style("background-color", departmentColors[dept]);
+            item.append("span")
+                .text(dept);
+        });
+        
         const pack = d3.pack()
-            .size([width - 20, height - 20])  // Add margin to prevent edge overflow
-            .padding(5);  // Increased padding between bubbles
+            .size([width - 40, height - 40])  // Larger margins to prevent overflow
+            .padding(8);  // More padding between bubbles
         
         const root = d3.hierarchy(data)
             .sum(d => d.value)
@@ -304,7 +322,7 @@
             .data(root.descendants().filter(d => d.depth === 2))
             .enter().append("g")
             .attr("class", "node")
-            .attr("transform", d => `translate(${d.x + 10},${d.y + 10})`);  // Offset for margin
+            .attr("transform", d => `translate(${d.x + 20},${d.y + 20})`);  // 20px offset for margins
         
         const bubbles = nodes.append("circle")
             .attr("class", "bubble")
@@ -336,45 +354,45 @@
                 .attr("dy", ".3em");
             
             // For very large bubbles (like Census), show full name or acronym
-            if (d.r > 70) {
+            if (d.r > 60) {
                 // Special case for very long names
                 if (d.data.name.includes("Census")) {
-                    text.style("font-size", "13px").text("Census");
+                    text.style("font-size", "12px").text("Census");
                 } else {
                     // Extract acronym if available
                     const match = d.data.name.match(/\(([^)]+)\)/);
                     if (match) {
-                        text.style("font-size", "13px").text(match[1]);
+                        text.style("font-size", "12px").text(match[1]);
                     } else {
-                        text.style("font-size", "13px").text(d.data.name.split(' ')[0]);
+                        text.style("font-size", "12px").text(d.data.name.split(' ')[0]);
                     }
                 }
             }
             // For large bubbles, show acronym or abbreviated name
-            else if (d.r > 45) {
+            else if (d.r > 40) {
                 const match = d.data.name.match(/\(([^)]+)\)/);
                 if (match) {
-                    text.style("font-size", "11px").text(match[1]);
+                    text.style("font-size", "10px").text(match[1]);
                 } else {
-                    text.style("font-size", "11px").text(d.data.name.split(' ')[0]);
+                    text.style("font-size", "10px").text(d.data.name.split(' ')[0]);
                 }
             }
             // For medium bubbles, show acronym or short name
-            else if (d.r > 25) {
+            else if (d.r > 22) {
                 const match = d.data.name.match(/\(([^)]+)\)/);
                 if (match) {
-                    text.style("font-size", "9px").text(match[1]);
+                    text.style("font-size", "8px").text(match[1]);
                 } else {
                     const firstWord = d.data.name.split(' ')[0];
                     const shortened = firstWord.length > 6 ? firstWord.substring(0, 4) + "." : firstWord;
-                    text.style("font-size", "9px").text(shortened);
+                    text.style("font-size", "8px").text(shortened);
                 }
             }
             // For smaller bubbles, show acronym if short enough
-            else if (d.r > 15) {
+            else if (d.r > 14) {
                 const match = d.data.name.match(/\(([^)]+)\)/);
                 if (match && match[1].length <= 6) {
-                    text.style("font-size", "7px").text(match[1]);
+                    text.style("font-size", "6px").text(match[1]);
                 }
                 // Otherwise don't show text for tiny bubbles
             }
