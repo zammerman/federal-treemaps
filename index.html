@@ -22,7 +22,8 @@
             flex-direction: column;
             align-items: center;
             background: transparent;
-            max-width: 705px;
+            width: 700px;
+            max-width: 700px;
         }
         
         #chart {
@@ -68,15 +69,16 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 15px;
+            margin-top: 10px;
             font-family: 'Faustina', serif;
             width: 100%;
+            max-width: 640px;
         }
         
         .legend-title {
             font-weight: 700;
-            font-size: 13px;
-            margin-bottom: 8px;
+            font-size: 12px;
+            margin-bottom: 6px;
             color: #333;
         }
         
@@ -84,19 +86,21 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 8px 12px;
-            max-width: 680px;
+            gap: 6px 10px;
+            width: 100%;
+            padding: 0 10px;
         }
         
         .legend-item {
             display: flex;
             align-items: center;
             font-family: 'Faustina', serif;
-            font-size: 11px;
+            font-size: 10px;
             cursor: pointer;
-            padding: 2px 6px;
+            padding: 2px 4px;
             border-radius: 3px;
             transition: background-color 0.2s;
+            white-space: nowrap;
         }
         
         .legend-item:hover {
@@ -104,10 +108,10 @@
         }
         
         .legend-color {
-            width: 12px;
-            height: 12px;
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
-            margin-right: 5px;
+            margin-right: 4px;
             flex-shrink: 0;
         }
     </style>
@@ -215,13 +219,27 @@
         };
         // ============================================
         
-        const width = 680;  // Uses full 705px minus some padding
-        const height = 480; // Reduced height to accommodate legend below
+        const width = 640;  // Reduced to ensure bubbles stay within 705px
+        const height = 460; // Slightly reduced height
         
         const departments = data.children.map(d => d.name);
         
-        // Create legend
+        // Create legend with abbreviated names for long departments
         const legend = d3.select("#legend");
+        const legendNames = {
+            "Agriculture": "Agriculture",
+            "Commerce": "Commerce",
+            "Education": "Education",
+            "Energy": "Energy",
+            "Health and Human Services": "HHS",
+            "Justice": "Justice",
+            "Labor": "Labor",
+            "National Science Foundation": "NSF",
+            "Social Security Administration": "SSA",
+            "Transportation": "Transportation",
+            "Treasury": "Treasury"
+        };
+        
         departments.forEach(dept => {
             const item = legend.append("div")
                 .attr("class", "legend-item")
@@ -230,12 +248,12 @@
                 .attr("class", "legend-color")
                 .style("background-color", departmentColors[dept]);
             item.append("span")
-                .text(dept);
+                .text(legendNames[dept] || dept);
         });
         
         const pack = d3.pack()
-            .size([width, height])
-            .padding(3);
+            .size([width - 20, height - 20])  // Add margin to prevent edge overflow
+            .padding(5);  // Increased padding between bubbles
         
         const root = d3.hierarchy(data)
             .sum(d => d.value)
@@ -254,7 +272,7 @@
             .data(root.descendants().filter(d => d.depth === 2))
             .enter().append("g")
             .attr("class", "node")
-            .attr("transform", d => `translate(${d.x},${d.y})`);
+            .attr("transform", d => `translate(${d.x + 10},${d.y + 10})`);  // Offset for margin
         
         const bubbles = nodes.append("circle")
             .attr("class", "bubble")
