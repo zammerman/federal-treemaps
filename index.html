@@ -15,13 +15,14 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
         }
         
         .container {
             display: flex;
+            flex-direction: column;
             align-items: center;
             background: transparent;
+            max-width: 705px;
         }
         
         #chart {
@@ -34,7 +35,7 @@
             text-align: left;
             padding: 10px;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            font-size: 13px;
+            font-size: 12px;
             background: white;
             border: 1px solid #ddd;
             border-radius: 5px;
@@ -66,30 +67,34 @@
         .legend-container {
             display: flex;
             flex-direction: column;
-            margin-left: 30px;
+            align-items: center;
+            margin-top: 15px;
             font-family: 'Faustina', serif;
+            width: 100%;
         }
         
         .legend-title {
             font-weight: 700;
-            font-size: 14px;
-            margin-bottom: 10px;
+            font-size: 13px;
+            margin-bottom: 8px;
             color: #333;
         }
         
         .legend {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px 12px;
+            max-width: 680px;
         }
         
         .legend-item {
             display: flex;
             align-items: center;
             font-family: 'Faustina', serif;
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
-            padding: 2px 4px;
+            padding: 2px 6px;
             border-radius: 3px;
             transition: background-color 0.2s;
         }
@@ -99,10 +104,11 @@
         }
         
         .legend-color {
-            width: 16px;
-            height: 16px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            margin-right: 8px;
+            margin-right: 5px;
+            flex-shrink: 0;
         }
     </style>
 </head>
@@ -195,22 +201,22 @@
         // CHANGE COLORS HERE - Each department needs a unique color
         // ============================================
         const departmentColors = {
-            "Agriculture": "#1B83C6",           // Blue
+            "Agriculture": "#FCBB13",           // Yellow
             "Commerce": "#05335D",              // Dark Blue
             "Education": "#B71D51",             // Red
             "Energy": "#F26961",                // Light Red
-            "Health and Human Services": "#FCBB13",  // Yellow
-            "Justice": "#6BAED6",               // Light Blue - CHANGE THIS
-            "Labor": "#08519C",                 // Medium Blue - CHANGE THIS
-            "National Science Foundation": "#E74C70",  // Pink - CHANGE THIS
-            "Social Security Administration": "#FDB863",  // Light Orange - CHANGE THIS
-            "Transportation": "#2166AC",        // Another Blue - CHANGE THIS
-            "Treasury": "#D94801"               // Dark Orange - CHANGE THIS
+            "Health and Human Services": "#1B83C6",  // Blue
+            "Justice": "#7A4FA3",               // Purple
+            "Labor": "#4CAF50",                 // Green
+            "National Science Foundation": "#9C27B0",  // Violet
+            "Social Security Administration": "#00BCD4",  // Cyan
+            "Transportation": "#795548",        // Brown
+            "Treasury": "#607D8B"               // Blue-Gray
         };
         // ============================================
         
-        const width = 900;
-        const height = 700;
+        const width = 680;  // Uses full 705px minus some padding
+        const height = 480; // Reduced height to accommodate legend below
         
         const departments = data.children.map(d => d.name);
         
@@ -279,29 +285,16 @@
                 .attr("class", "bubble-label")
                 .attr("dy", ".3em");
             
-            // For very large bubbles (Census), we can use full name
-            if (d.r > 100) {
-                text.style("font-size", "16px")
-                    .text(d.data.name);
+            // For very large bubbles (Census), use abbreviated name
+            if (d.r > 70) {
+                text.style("font-size", "13px")
+                    .text("Census");
             }
-            // For medium bubbles, use abbreviated names
-            else if (d.r > 40) {
-                text.style("font-size", d => Math.min(d.r / 5, 14) + "px")
+            // For large bubbles
+            else if (d.r > 45) {
+                text.style("font-size", "11px")
                     .text(d => {
                         // Extract acronym from name if it exists
-                        const match = d.data.name.match(/\(([^)]+)\)/);
-                        if (match) {
-                            return match[1];
-                        }
-                        // Otherwise use first few words
-                        const words = d.data.name.split(' ');
-                        return words.slice(0, 2).join(' ');
-                    });
-            }
-            // For smaller bubbles, use just acronym or very short text
-            else if (d.r > 20) {
-                text.style("font-size", d => Math.min(d.r / 4, 10) + "px")
-                    .text(d => {
                         const match = d.data.name.match(/\(([^)]+)\)/);
                         if (match) {
                             return match[1];
@@ -309,9 +302,20 @@
                         return d.data.name.split(' ')[0];
                     });
             }
-            // For tiny bubbles, add value instead of name
+            // For medium bubbles
+            else if (d.r > 25) {
+                text.style("font-size", "9px")
+                    .text(d => {
+                        const match = d.data.name.match(/\(([^)]+)\)/);
+                        if (match) {
+                            return match[1];
+                        }
+                        return d.data.name.split(' ')[0].substring(0, 4);
+                    });
+            }
+            // For smaller bubbles
             else if (d.r > 15) {
-                text.style("font-size", "8px")
+                text.style("font-size", "7px")
                     .text(d => "$" + d.data.value.toFixed(0) + "M");
             }
         });
